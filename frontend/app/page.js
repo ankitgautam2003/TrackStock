@@ -25,8 +25,8 @@ export default function Dashboard() {
         setLowStockItems(lowStockRes.data.data);
         setDeadStockItems(deadStockRes.data.data);
       } catch (err) {
-        setError('Failed to load dashboard. Make sure backend is running on port 5000.');
-        console.error(err);
+        setError('Failed to load dashboard. Please check your internet connection or try again later.');
+        console.error('Dashboard error:', err);
       } finally {
         setLoading(false);
       }
