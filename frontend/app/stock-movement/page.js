@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useSearchParams } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import StockMovementForm from '@/components/StockMovementForm';
