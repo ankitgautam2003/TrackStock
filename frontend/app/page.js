@@ -25,8 +25,10 @@ export default function Dashboard() {
         setLowStockItems(lowStockRes.data.data);
         setDeadStockItems(deadStockRes.data.data);
       } catch (err) {
-        setError('Failed to load dashboard. Please check your internet connection or try again later.');
+        const errorMessage = err.response?.data?.error || err.message || 'Unknown error';
+        setError(`Failed to load dashboard: ${errorMessage}`);
         console.error('Dashboard error:', err);
+        console.error('API URL:', process.env.NEXT_PUBLIC_API_URL);
       } finally {
         setLoading(false);
       }
