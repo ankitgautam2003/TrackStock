@@ -2,14 +2,12 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useSearchParams } from 'next/navigation';
 import Navigation from '@/components/Navigation';
 import StockMovementForm from '@/components/StockMovementForm';
 import { stockMovementsAPI } from '@/lib/api';
 import { useState, useEffect } from 'react';
 
 export default function StockMovementPage() {
-  const searchParams = useSearchParams();
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
