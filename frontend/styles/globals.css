@@ -189,6 +189,12 @@ html.dark textarea:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
 html.dark th {
   background-color: #374151;
   border-bottom-color: #4b5563;
@@ -219,6 +225,7 @@ th {
   text-align: left;
   font-weight: 600;
   border-bottom: 2px solid #d1d5db;
+  white-space: nowrap;
 }
 
 td {

@@ -11,6 +11,12 @@ export default function Dashboard() {
   const [deadStockItems, setDeadStockItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Sorting and filtering states
+  const [lowStockSort, setLowStockSort] = useState({ field: 'availableQuantity', order: 'asc' });
+  const [deadStockSort, setDeadStockSort] = useState({ field: 'availableQuantity', order: 'desc' });
+  const [lowStockSearch, setLowStockSearch] = useState('');
+  const [deadStockSearch, setDeadStockSearch] = useState('');
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -36,6 +42,44 @@ export default function Dashboard() {
 
     loadDashboard();
   }, []);
+
+  // Sorting and filtering functions
+  const handleSort = (items, sortConfig) => {
+    const sorted = [...items].sort((a, b) => {
+      const aValue = a[sortConfig.field];
+      const bValue = b[sortConfig.field];
+      
+      if (typeof aValue === 'string') {
+        return sortConfig.order === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      }
+      
+      return sortConfig.order === 'asc' 
+        ? aValue - bValue
+        : bValue - aValue;
+    });
+    return sorted;
+  };
+
+  const filterItems = (items, searchTerm) => {
+    if (!searchTerm) return items;
+    return items.filter(item =>
+      item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+
+  const toggleSort = (currentSort, setSort, field) => {
+    setSort({
+      field,
+      order: currentSort.field === field && currentSort.order === 'asc' ? 'desc' : 'asc'
+    });
+  };
+
+  // Get filtered and sorted items
+  const filteredLowStock = handleSort(filterItems(lowStockItems, lowStockSearch), lowStockSort);
+  const filteredDeadStock = handleSort(filterItems(deadStockItems, deadStockSearch), deadStockSort);
 
   if (loading) {
     return (
@@ -96,22 +140,59 @@ export default function Dashboard() {
               View All
             </Link>
           </div>
-          {lowStockItems.length === 0 ? (
+          
+          {/* Search Filter */}
+          <div className="form-group mb-4">
+            <input
+              type="text"
+              placeholder="Search by SKU or Name..."
+              value={lowStockSearch}
+              onChange={(e) => setLowStockSearch(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          
+          {filteredLowStock.length === 0 ? (
             <p className="text-gray-500">No items below reorder level</p>
           ) : (
             <div className="overflow-x-auto">
               <table>
                 <thead>
                   <tr>
-                    <th className="hidden sm:table-cell">SKU</th>
-                    <th>Name</th>
-                    <th>Current Stock</th>
-                    <th className="hidden md:table-cell">Reorder Level</th>
-                    <th className="hidden lg:table-cell">Unit Price</th>
+                    <th 
+                      className="hidden sm:table-cell cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(lowStockSort, setLowStockSort, 'sku')}
+                    >
+                      SKU {lowStockSort.field === 'sku' && (lowStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(lowStockSort, setLowStockSort, 'name')}
+                    >
+                      Name {lowStockSort.field === 'name' && (lowStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(lowStockSort, setLowStockSort, 'availableQuantity')}
+                    >
+                      Current Stock {lowStockSort.field === 'availableQuantity' && (lowStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className="hidden md:table-cell cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(lowStockSort, setLowStockSort, 'reorderLevel')}
+                    >
+                      Reorder Level {lowStockSort.field === 'reorderLevel' && (lowStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className="hidden lg:table-cell cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(lowStockSort, setLowStockSort, 'unitPrice')}
+                    >
+                      Unit Price {lowStockSort.field === 'unitPrice' && (lowStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {lowStockItems.slice(0, 5).map((item) => (
+                  {filteredLowStock.slice(0, 5).map((item) => (
                     <tr key={item.id}>
                       <td className="font-mono font-bold hidden sm:table-cell">{item.sku}</td>
                       <td>{item.name}</td>
@@ -136,22 +217,54 @@ export default function Dashboard() {
               View All
             </Link>
           </div>
-          {deadStockItems.length === 0 ? (
+          
+          {/* Search Filter */}
+          <div className="form-group mb-4">
+            <input
+              type="text"
+              placeholder="Search by SKU or Name..."
+              value={deadStockSearch}
+              onChange={(e) => setDeadStockSearch(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          
+          {filteredDeadStock.length === 0 ? (
             <p className="text-gray-500">No dead stock detected</p>
           ) : (
             <div className="overflow-x-auto">
               <table>
                 <thead>
                   <tr>
-                    <th className="hidden sm:table-cell">SKU</th>
-                    <th>Name</th>
-                    <th>Stock Quantity</th>
-                    <th className="hidden md:table-cell">Unit Price</th>
+                    <th 
+                      className="hidden sm:table-cell cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(deadStockSort, setDeadStockSort, 'sku')}
+                    >
+                      SKU {deadStockSort.field === 'sku' && (deadStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(deadStockSort, setDeadStockSort, 'name')}
+                    >
+                      Name {deadStockSort.field === 'name' && (deadStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className="cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(deadStockSort, setDeadStockSort, 'availableQuantity')}
+                    >
+                      Stock Quantity {deadStockSort.field === 'availableQuantity' && (deadStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className="hidden md:table-cell cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+                      onClick={() => toggleSort(deadStockSort, setDeadStockSort, 'unitPrice')}
+                    >
+                      Unit Price {deadStockSort.field === 'unitPrice' && (deadStockSort.order === 'asc' ? '↑' : '↓')}
+                    </th>
                     <th className="hidden lg:table-cell">Stock Value</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {deadStockItems.slice(0, 5).map((item) => (
+                  {filteredDeadStock.slice(0, 5).map((item) => (
                     <tr key={item.id}>
                       <td className="font-mono font-bold hidden sm:table-cell">{item.sku}</td>
                       <td>{item.name}</td>
